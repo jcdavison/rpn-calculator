@@ -1,3 +1,4 @@
+require 'pry'
 class RPNExpression
   attr_accessor :expr
   # Returns an object representing the supplied RPN expression
@@ -12,15 +13,28 @@ class RPNExpression
   #
   # @return [Numeric] the evaluated RPN expression
   def evaluate
-    p @expr.gsub!(" ", "")
     stack = []
-    @expr.length.times do |n|
-      if @expr[n..n+1].match(/\d{2}/)
-        stack[0] = @expr[n].to_i
-      elsif @expr[n..n+1].match(/\d{1}(\+|\-|\*|\/)/)
-        stack[0] = stack[0].send(@expr[n+1], @expr[n].to_i)
+    rm_whitespace!
+    tokens = tokenize!
+    tokens.length.times do |n|
+      if tokens[n..n+1].join.match(/\d{2}/)
+        stack[0] = tokens[n]
+      elsif tokens[n..n+1].join.match(/\d{1}(\+|\-|\*|\/)/)
+        int = tokens[n]
+        operator = tokens[n+1]
+        stack[0] = stack[0].send(operator, int)
       end
     end
     stack[0]
+  end
+
+  private
+
+  def tokenize!
+    @expr.chars.map! {|t| t[/\d/] ? t.to_i : t.to_sym }
+  end
+
+  def rm_whitespace!
+    @expr.gsub!(" ", "")
   end
 end
