@@ -1,4 +1,3 @@
-require 'pry'
 class RPNExpression
   attr_accessor :expr
   # Returns an object representing the supplied RPN expression
@@ -18,8 +17,8 @@ class RPNExpression
     tokens = tokenize!
     tokens.length.times do |n|
       int = tokens[n]
-      operator = tokens[n+1]
-      pair = tokens[n..n+1]
+      operator = tokens[n + 1]
+      pair = tokens[n..n + 1]
       if integer_pair?(pair)
         stack[0] = int
       elsif integer_operator?(pair)
@@ -40,7 +39,7 @@ class RPNExpression
   end
 
   def tokenize!
-    @expr.chars.map! {|t| t[/\d/] ? t.to_i : t.to_sym }
+    @expr.chars.map! { |t| t[/\d/] ? t.to_i : t.to_sym }
   end
 
   def rm_whitespace!
