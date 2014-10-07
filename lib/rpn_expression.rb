@@ -17,11 +17,12 @@ class RPNExpression
     rm_whitespace!
     tokens = tokenize!
     tokens.length.times do |n|
-      if tokens[n..n+1].join.match(/\d{2}/)
-        stack[0] = tokens[n]
-      elsif tokens[n..n+1].join.match(/\d{1}(\+|\-|\*|\/)/)
-        int = tokens[n]
-        operator = tokens[n+1]
+      int = tokens[n]
+      operator = tokens[n+1]
+      pair = tokens[n..n+1]
+      if integer_pair?(pair)
+        stack[0] = int
+      elsif integer_operator?(pair)
         stack[0] = stack[0].send(operator, int)
       end
     end
@@ -29,6 +30,14 @@ class RPNExpression
   end
 
   private
+
+  def integer_pair?(elements)
+    elements.join.match(/\d{2}/)
+  end
+
+  def integer_operator?(elements)
+    elements.join.match(/\d{1}(\+|\-|\*|\/)/)
+  end
 
   def tokenize!
     @expr.chars.map! {|t| t[/\d/] ? t.to_i : t.to_sym }
