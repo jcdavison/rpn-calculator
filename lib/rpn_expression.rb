@@ -1,48 +1,39 @@
+require 'stack'
+
 class RPNExpression
-  attr_accessor :expr
-  # Returns an object representing the supplied RPN expression
-  #
-  # @param expr [String] an RPN expression, e.g., "5 4 +"
-  def initialize(expr)
-    @expr = expr
+  attr_accessor :expr , :stack
+
+  def initialize
+    @stack = Stack.new
   end
 
-  # Evaluates the underlying RPN expression and returns the final result as a
-  # number.
-  #
-  # @return [Numeric] the evaluated RPN expression
-  def evaluate
-    stack = []
-    rm_whitespace!
-    tokens = tokenize!
-    tokens.length.times do |n|
-      int = tokens[n]
-      operator = tokens[n + 1]
-      pair = tokens[n..n + 1]
-      if integer_pair?(pair)
-        stack[0] = int
-      elsif integer_operator?(pair)
-        stack[0] = stack[0].send(operator, int)
+  def evaluate(expr)
+    tokens(expr).each do |token|
+      operator = is_operator!(token)
+      if operator
+        rs_int = @stack.pop
+        ls_int = @stack.pop
+        @stack.push(ls_int.send(operator, rs_int))
+      else
+        @stack.push(token)
       end
     end
-    stack[0]
+    @stack.peek
   end
 
   private
+  OPERATOR_MAP = {
+    "+" => :+,
+    "-" => :-,
+    "*" => :*,
+    "/" => :/
+  }
 
-  def integer_pair?(elements)
-    elements.join.match(/\d{2}/)
+  def is_operator!(element)
+    OPERATOR_MAP[element]
   end
 
-  def integer_operator?(elements)
-    elements.join.match(/\d{1}(\+|\-|\*|\/)/)
-  end
-
-  def tokenize!
-    @expr.chars.map! { |t| t[/\d/] ? t.to_i : t.to_sym }
-  end
-
-  def rm_whitespace!
-    @expr.gsub!(" ", "")
+  def tokens(expr)
+    expr.split(" ").map! { |t| t[/^-?\d*$/] ? t.to_i : t }
   end
 end
